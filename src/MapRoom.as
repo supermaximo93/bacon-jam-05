@@ -1,5 +1,6 @@
 package  
 {
+	import adobe.utils.ProductManager;
 	import org.flixel.*;
 	/**
 	 * ...
@@ -15,6 +16,7 @@ package
 		private var _positionY:int;
 		private var _connectedRooms:Array;
 		private var _lights:Array;
+		private var _overlay:RoomOverlay;
 		
 		public function get positionX():int
 		{
@@ -91,6 +93,14 @@ package
 		{
 			for (var i:int = 0; i < _lights.length; ++i)
 				group.add(_lights[i]);
+			group.add(_overlay);
+		}
+		
+		public function removeLight(light:Light):void
+		{
+			ArrayHelpers.removeElement(_lights, light);
+			if (_lights.length == 0)
+				_overlay.setLightsOut();
 		}
 		
 		private function generateLights(roomWidth:int, roomHeight:int):void
@@ -100,13 +110,21 @@ package
 			
 			var minX:int = (positionX * roomWidth) + 1;
 			var maxX:int = minX + roomWidth - 2;
+			var midX:int = int(lerp(minX, maxX, 0.5));
 			var minY:int = (positionY * roomHeight) + 1;
 			var maxY:int = minY + roomHeight - 2;
+			var midY:int = int(lerp(minY, maxY, 0.5));
 			
 			do
 			{
 				var x:int = int(lerp(minX, maxX, FlxG.random()));
 				var y:int = int(lerp(minY, maxY, FlxG.random()));
+				
+				if ((x == minX || x == maxX) && y == midY)
+					continue;
+				if ((y == minY || y == maxY) && x == midX)
+					continue;
+				
 				var positionTaken:Boolean = false;
 				
 				for (var i:int = 0; i < _lights.length; ++i)
@@ -123,6 +141,8 @@ package
 					_lights.push(new Light(x, y, this));
 				
 			} while (_lights.length < lightCount);
+			
+			_overlay = new RoomOverlay(minX, minY, roomWidth - 2, roomHeight - 2);
 		}
 		
 		private function lerp(min:Number, max:Number, percentage:Number):Number

@@ -26,6 +26,7 @@ package
 		{
 			makeGraphic(PlayState.TILE_SIZE, PlayState.TILE_SIZE, 0xff00ffff);
 			_smashed = true;
+			_room.removeLight(this);
 		}
 		
 	}

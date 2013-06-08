@@ -10,8 +10,9 @@ package
 	public class PlayState extends FlxState 
 	{
 		public static const TILE_SIZE:int = 8;
-		private const COMBOTEXT_OFFSET:int = 10;
-		private const PLAYERMOVESTEXT_OFFSET:int = 100;
+		private const SCORETEXT_OFFSET:int = 5;
+		private const COMBOTEXT_OFFSET:int = 20;
+		//private const PLAYERMOVESTEXT_OFFSET:int = 100;
 		private const LEVEL_WIDTH:int = 50;
 		private const LEVEL_HEIGHT:int = 50;
 		private const LEVEL_COLUMNS:int = 5;
@@ -20,10 +21,12 @@ package
 		
 		private var songManager:SongManager;
 		private var player:Player;
+		private var score:int;
+		private var scoreText:FlxText;
 		private var combo:int;
 		private var comboText:FlxText;
 		private var playerMoves:int;
-		private var playerMovesText:FlxText;
+		//private var playerMovesText:FlxText;
 		private var hud:FlxGroup;
 		private var otherEntities:FlxGroup;
 		private var levelData:Object;
@@ -43,14 +46,17 @@ package
 			add(otherEntities);
 			FlxG.camera.follow(player);
 			
+			score = 0;
 			combo = 0;
 			playerMoves = 0;
-			comboText = new FlxText(COMBOTEXT_OFFSET, COMBOTEXT_OFFSET, 100, "x0");
+			scoreText = new FlxText(SCORETEXT_OFFSET, SCORETEXT_OFFSET, 100, "Score: 0");
+			comboText = new FlxText(SCORETEXT_OFFSET, COMBOTEXT_OFFSET, 100, "x0");
 			comboText.visible = false;
-			playerMovesText = new FlxText(COMBOTEXT_OFFSET, PLAYERMOVESTEXT_OFFSET, 100, "Moves: 0");
+			//playerMovesText = new FlxText(SCORETEXT_OFFSET, PLAYERMOVESTEXT_OFFSET, 100, "Moves: 0");
 			hud = new FlxGroup();
+			hud.add(scoreText);
 			hud.add(comboText);
-			hud.add(playerMovesText);
+			//hud.add(playerMovesText);
 			hud.setAll("scrollFactor", new FlxPoint(0, 0));
 			add(hud);
 			
@@ -161,7 +167,7 @@ package
 					combo = 0;
 					comboText.visible = false;
 				}
-				playerMovesText.text = "Moves: " + playerMoves.toString();
+				//playerMovesText.text = "Moves: " + playerMoves.toString();
 			}
 			
 			
@@ -169,6 +175,8 @@ package
 				player.scale = new FlxPoint(1.2, 1.2);
 			else
 				player.scale = new FlxPoint(1.0, 1.0);
+			
+			scoreText.text = "Score: " + (score - playerMoves).toString();
 			
 			super.update();
 		}
@@ -212,6 +220,7 @@ package
 						return false;
 					
 					light.smash();
+					score += combo;
 					return true;
 					
 				}
