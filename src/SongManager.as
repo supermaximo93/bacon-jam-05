@@ -15,63 +15,63 @@ package
 		
 		private const BEAT_TIME_TOLERANCE:Number = 0.2;
 		
-		private var bpm:int;
-		private var timePerBeat:Number;
-		private var time:Number;
-		private var beatAlreadyScored:Boolean;
+		private var _bpm:int;
+		private var _timePerBeat:Number;
+		private var _time:Number;
+		private var _beatAlreadyScored:Boolean;
 		
-		private var beats:Array = [
+		private var _beats:Array = [
 			1, 1, 1, 0.5, 0.5
 		];
-		private var beatIndex:int;
-		private var nextBeatTime:Number;
+		private var _beatIndex:int;
+		private var _nextBeatTime:Number;
 		
 		public function SongManager(bpm:int) 
 		{
-			this.bpm = bpm;
+			_bpm = bpm;
 			var beatsPerSecond:Number = bpm / 60.0;
-			timePerBeat = 1.0 / beatsPerSecond;
-			time = 0.0;
-			beatIndex = -1;
-			nextBeatTime = timePerBeat;
-			beatAlreadyScored = false;
+			_timePerBeat = 1.0 / beatsPerSecond;
+			_time = 0.0;
+			_beatIndex = -1;
+			_nextBeatTime = _timePerBeat;
+			_beatAlreadyScored = false;
 		}
 		
 		public function update():void
 		{
-			time += FlxG.elapsed;
-			if (time >= nextBeatTime)
+			_time += FlxG.elapsed;
+			if (_time >= _nextBeatTime)
 			{
 				//if (beatIndex < 0)
 				//	FlxG.playMusic(testMusic);
 				
-				time -= nextBeatTime;
-				if (++beatIndex >= beats.length)
-					beatIndex = 0;
-				nextBeatTime = timePerBeat * beats[beatIndex];
+				_time -= _nextBeatTime;
+				if (++_beatIndex >= _beats.length)
+					_beatIndex = 0;
+				_nextBeatTime = _timePerBeat * _beats[_beatIndex];
 				
 				FlxG.play(kickSound);
 			}
 			
 			if (!moveIsInTime())
-				beatAlreadyScored = false;
+				_beatAlreadyScored = false;
 		}
 		
 		public function scoreBeat():Boolean
 		{
-			var result:Boolean = !beatAlreadyScored && moveIsInTime();
-			beatAlreadyScored = true;
+			var result:Boolean = !_beatAlreadyScored && moveIsInTime();
+			_beatAlreadyScored = true;
 			return result;
 		}
 		
 		public function moveIsInTime():Boolean
 		{
-			return time <= BEAT_TIME_TOLERANCE;// || time >= nextBeatTime - BEAT_TIME_TOLERANCE;
+			return _time <= BEAT_TIME_TOLERANCE;// || time >= nextBeatTime - BEAT_TIME_TOLERANCE;
 		}
 		
 		public function moveIsInTimeForVisuals():Boolean
 		{
-			return time <= BEAT_TIME_TOLERANCE;
+			return _time <= BEAT_TIME_TOLERANCE;
 		}
 		
 	}

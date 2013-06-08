@@ -8,9 +8,12 @@ package
 	
 	public class MapGenerator 
 	{		
-		public static function generateMap(width:int, height:int, columns:int, rows:int, corridorPadding:int):Array
+		public static function generateMap(width:int, height:int, columns:int, rows:int, corridorPadding:int):Object
 		{
-			var collisionMap:Array = generateCollisionMapFromRooms(generateRoomConnections(columns, rows), width, height, columns, rows, corridorPadding);
+			var roomWidth:int = width / columns;
+			var roomHeight:int = height / rows;
+			var rooms:Array = generateRoomConnections(columns, rows, roomWidth, roomHeight);
+			var collisionMap:Array = generateCollisionMapFromRooms(rooms, width, height, columns, rows, corridorPadding);
 			
 			var mapArray:Array = new Array();
 			
@@ -20,7 +23,10 @@ package
 					mapArray.push(collisionMap[x][y]);
 			}
 				
-			return mapArray;
+			return {
+				tileMap: mapArray,
+				rooms: rooms
+			};
 		}
 		
 		private static function generateCollisionMapFromRooms(rooms:Array, width:int, height:int, columns:int, rows:int, corridorPadding:int):Array
@@ -134,7 +140,7 @@ package
 			}
 		}
 		
-		private static function generateRoomConnections(columns:int, rows:int):Array
+		private static function generateRoomConnections(columns:int, rows:int, roomWidth:int, roomHeight:int):Array
 		{
 			var rooms:Array = ArrayHelpers.new2DArray(columns, rows, null);
 			var disconnectedRooms:Array = new Array();
@@ -142,7 +148,7 @@ package
 			{
 				for (var y:int = 0; y < rows; ++y)
 				{
-					var room:MapRoom = new MapRoom(new FlxPoint(x, y));
+					var room:MapRoom = new MapRoom(x, y, roomWidth, roomHeight);
 					rooms[x][y] = room;
 					disconnectedRooms.push(room);
 				}

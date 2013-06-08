@@ -11,6 +11,7 @@ package
 	{
 		public static const TILE_SIZE:int = 8;
 		private const COMBOTEXT_OFFSET:int = 10;
+		private const PLAYERMOVESTEXT_OFFSET:int = 100;
 		private const LEVEL_WIDTH:int = 50;
 		private const LEVEL_HEIGHT:int = 50;
 		private const LEVEL_COLUMNS:int = 5;
@@ -21,9 +22,11 @@ package
 		private var player:Player;
 		private var combo:int;
 		private var comboText:FlxText;
+		private var playerMoves:int;
+		private var playerMovesText:FlxText;
 		private var hud:FlxGroup;
 		private var otherEntities:FlxGroup;
-		private var levelData:Array;
+		private var levelData:Object;
 		private var tileMap:FlxTilemap;
 		
 		override public function create():void 
@@ -31,22 +34,33 @@ package
 			songManager = new SongManager(120);
 			
 			tileMap = new FlxTilemap();
-			levelData = getLevelData();
-			tileMap.loadMap(FlxTilemap.arrayToCSV(levelData, LEVEL_WIDTH), FlxTilemap.ImgAuto, 0, 0, FlxTilemap.AUTO);
 			add(tileMap);
 			
-			player = new Player(5, 5);
-			comboText = new FlxText(COMBOTEXT_OFFSET, COMBOTEXT_OFFSET, 100, "x0");
-			hud = new FlxGroup();
 			otherEntities = new FlxGroup();
+			
+			player = new Player(5, 5);
 			add(player);
-			otherEntities.add(new Light(10, 10));
 			add(otherEntities);
-			hud.add(comboText);
-			add(hud);
-			hud.setAll("scrollFactor", new FlxPoint(0, 0));
 			FlxG.camera.follow(player);
+			
 			combo = 0;
+			playerMoves = 0;
+			comboText = new FlxText(COMBOTEXT_OFFSET, COMBOTEXT_OFFSET, 100, "x0");
+			comboText.visible = false;
+			playerMovesText = new FlxText(COMBOTEXT_OFFSET, PLAYERMOVESTEXT_OFFSET, 100, "Moves: 0");
+			hud = new FlxGroup();
+			hud.add(comboText);
+			hud.add(playerMovesText);
+			hud.setAll("scrollFactor", new FlxPoint(0, 0));
+			add(hud);
+			
+			levelData = getLevelData();
+			for (var x:int = 0; x < LEVEL_COLUMNS; ++x)
+			{
+				for (var y:int = 0; y < LEVEL_ROWS; ++y)
+					levelData.rooms[x][y].addLightsToGroup(otherEntities);
+			}
+			tileMap.loadMap(FlxTilemap.arrayToCSV(levelData.tileMap, LEVEL_WIDTH), FlxTilemap.ImgAuto, 0, 0, FlxTilemap.AUTO);
 		}
 		
 		override public function update():void 
@@ -62,6 +76,8 @@ package
 					player.moveDown();
 					comboBreaker = true;
 				}
+				else
+					++playerMoves;
 				playerDidAction = true;
 			}
 			else if (FlxG.keys.justPressed("S"))
@@ -72,6 +88,8 @@ package
 					player.moveUp();
 					comboBreaker = true;
 				}
+				else
+					++playerMoves;
 				playerDidAction = true;
 			}
 			else if (FlxG.keys.justPressed("A"))
@@ -82,6 +100,8 @@ package
 					player.moveRight();
 					comboBreaker = true;
 				}
+				else
+					++playerMoves;
 				playerDidAction = true;
 			}
 			else if (FlxG.keys.justPressed("D"))
@@ -92,6 +112,8 @@ package
 					player.moveLeft();
 					comboBreaker = true;
 				}
+				else
+					++playerMoves;
 				playerDidAction = true;
 			}
 			else if (FlxG.keys.justPressed("UP"))
@@ -129,11 +151,17 @@ package
 			if (playerDidAction)
 			{
 				if (!comboBreaker && songManager.scoreBeat())
+				{
 					++combo;
+					comboText.text = "x" + combo.toString();
+					comboText.visible = true;
+				}
 				else
+				{
 					combo = 0;
-				
-				comboText.text = "x" + combo.toString();
+					comboText.visible = false;
+				}
+				playerMovesText.text = "Moves: " + playerMoves.toString();
 			}
 			
 			
@@ -169,7 +197,7 @@ package
 			var x:int = player.tileX;
 			var y:int = player.tileY;
 			
-			var levelHeight:int = levelData.length / LEVEL_WIDTH;
+			var levelHeight:int = levelData.tileMap.length / LEVEL_WIDTH;
 			while (x > 0 && x < LEVEL_WIDTH && y > 0 && y < levelHeight)
 			{
 				x += hitscanVector.x;
@@ -180,7 +208,7 @@ package
 				if (entity != null)
 				{
 					var light:Light = entity as Light;
-					if (light == null || light.destroyed)
+					if (light == null || light.smashed)
 						return false;
 					
 					light.smash();
@@ -194,7 +222,7 @@ package
 		
 		private function wallAtPosition(x:int, y:int):Boolean
 		{
-			return levelData[x + (y * LEVEL_WIDTH)] == 1;
+			return levelData.tileMap[x + (y * LEVEL_WIDTH)] == 1;
 		}
 		
 		private function entityAtPosition(x:int, y:int):Entity
@@ -202,7 +230,7 @@ package
 			for (var i:int = 0; i < otherEntities.members.length; ++i)
 			{
 				var entity:Entity = otherEntities.members[i] as Entity;
-				if (entity.alive && entity.tileX == x && entity.tileY == y)
+				if (entity != null && entity.alive && entity.tileX == x && entity.tileY == y)
 					return entity;
 			}
 			return null;
@@ -220,51 +248,9 @@ package
 			return null;
 		}
 		
-		private function getLevelData():Array
+		private function getLevelData():Object
 		{
 			return MapGenerator.generateMap(LEVEL_WIDTH, LEVEL_HEIGHT, LEVEL_COLUMNS, LEVEL_ROWS, CORRIDOR_PADDING);
-			/*return new Array(
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-				1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-				1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-				1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-				1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-				1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1,
-				1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1,
-				1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-				1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
-				1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
-				1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1,
-				1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-				1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
-				1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
-				1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-				1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1,
-				1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1,
-				1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-				1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-				1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-				1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-				1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1,
-				1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1,
-				1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-				1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-				1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1,
-				1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-				1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
-			);*/
 		}
 		
 	}

@@ -8,12 +8,13 @@ package
 	public class MapRoom 
 	{
 		
-		private const CHANCE_OF_CORRIDOR:Number = -1;
+		private const CHANCE_OF_CORRIDOR:Number = 0.2;
 		
 		private var _isCorridor:Boolean;
 		private var _positionX:int;
 		private var _positionY:int;
 		private var _connectedRooms:Array;
+		private var _lights:Array;
 		
 		public function get positionX():int
 		{
@@ -40,12 +41,15 @@ package
 			return _connectedRooms.length > 0;
 		}
 		
-		public function MapRoom(position:FlxPoint)
+		public function MapRoom(positionX:int, positionY:int, roomWidth:int, roomHeight:int)
 		{
-			_positionX = position.x;
-			_positionY = position.y;
-			_connectedRooms = new Array();
+			_positionX = positionX;
+			_positionY = positionY;
 			_isCorridor = FlxG.random() <= CHANCE_OF_CORRIDOR;
+			_connectedRooms = new Array();
+			_lights = new Array();
+			if (!_isCorridor)
+				generateLights(roomWidth, roomHeight);
 		}
 		
 		public function connectTo(room:MapRoom):void
@@ -81,6 +85,49 @@ package
 			if (neighbors.length > 0)
 				return ArrayHelpers.sample(neighbors) as MapRoom;
 			return null;
+		}
+		
+		public function addLightsToGroup(group:FlxGroup):void
+		{
+			for (var i:int = 0; i < _lights.length; ++i)
+				group.add(_lights[i]);
+		}
+		
+		private function generateLights(roomWidth:int, roomHeight:int):void
+		{
+			const LIGHTS_PER_SQUARE:Number = 0.03;
+			var lightCount:int = int(LIGHTS_PER_SQUARE * roomWidth * roomHeight * Math.random());
+			
+			var minX:int = (positionX * roomWidth) + 1;
+			var maxX:int = minX + roomWidth - 2;
+			var minY:int = (positionY * roomHeight) + 1;
+			var maxY:int = minY + roomHeight - 2;
+			
+			do
+			{
+				var x:int = int(lerp(minX, maxX, FlxG.random()));
+				var y:int = int(lerp(minY, maxY, FlxG.random()));
+				var positionTaken:Boolean = false;
+				
+				for (var i:int = 0; i < _lights.length; ++i)
+				{
+					var light:Light = _lights[i] as Light;
+					if (light.tileX == x && light.tileY == y)
+					{
+						positionTaken = true;
+						break;
+					}
+				}
+				
+				if (!positionTaken)
+					_lights.push(new Light(x, y, this));
+				
+			} while (_lights.length < lightCount);
+		}
+		
+		private function lerp(min:Number, max:Number, percentage:Number):Number
+		{
+			return min + ((max - min) * percentage);
 		}
 		
 	}

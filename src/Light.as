@@ -7,17 +7,19 @@ package
 	public class Light extends Entity 
 	{
 		private var _smashed:Boolean;
+		private var _room:MapRoom;
 		
-		public function get destroyed():Boolean
+		public function get smashed():Boolean
 		{
 			return _smashed;
 		}
 		
-		public function Light(x:int, y:int) 
+		public function Light(x:int, y:int, room:MapRoom) 
 		{
 			super(x, y, null);
 			makeGraphic(PlayState.TILE_SIZE, PlayState.TILE_SIZE, 0xffff00ff);
 			_smashed = false;
+			_room = room;
 		}
 		
 		public function smash():void
