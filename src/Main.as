@@ -14,7 +14,7 @@ package
 		
 		public function Main():void 
 		{
-			super(320, 240, PlayState, 2, FRAMERATE, FRAMERATE);
+			super(160, 120, PlayState, 4, FRAMERATE, FRAMERATE);
 		}
 	}
 	

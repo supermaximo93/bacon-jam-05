@@ -13,14 +13,15 @@ package
 		[Embed(source="../assets/music/test.mp3")] private var testMusic:Class;
 		[Embed(source="../assets/sounds/kick.mp3")] private var kickSound:Class;
 		
-		private const BEAT_TIME_TOLERANCE:Number = 0.1;
+		private const BEAT_TIME_TOLERANCE:Number = 0.2;
 		
 		private var bpm:int;
 		private var timePerBeat:Number;
 		private var time:Number;
+		private var beatAlreadyScored:Boolean;
 		
 		private var beats:Array = [
-			1, 1, 1, 1
+			1, 1, 1, 0.5, 0.5
 		];
 		private var beatIndex:int;
 		private var nextBeatTime:Number;
@@ -33,6 +34,7 @@ package
 			time = 0.0;
 			beatIndex = -1;
 			nextBeatTime = timePerBeat;
+			beatAlreadyScored = false;
 		}
 		
 		public function update():void
@@ -47,13 +49,24 @@ package
 				if (++beatIndex >= beats.length)
 					beatIndex = 0;
 				nextBeatTime = timePerBeat * beats[beatIndex];
+				
 				FlxG.play(kickSound);
 			}
+			
+			if (!moveIsInTime())
+				beatAlreadyScored = false;
+		}
+		
+		public function scoreBeat():Boolean
+		{
+			var result:Boolean = !beatAlreadyScored && moveIsInTime();
+			beatAlreadyScored = true;
+			return result;
 		}
 		
 		public function moveIsInTime():Boolean
 		{
-			return time <= BEAT_TIME_TOLERANCE || time >= nextBeatTime - BEAT_TIME_TOLERANCE;
+			return time <= BEAT_TIME_TOLERANCE;// || time >= nextBeatTime - BEAT_TIME_TOLERANCE;
 		}
 		
 		public function moveIsInTimeForVisuals():Boolean
