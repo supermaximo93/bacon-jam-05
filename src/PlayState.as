@@ -153,29 +153,67 @@ package
 		
 		private function playerIsCollidingWithEntity():Boolean
 		{
-			return entityAtPosition(player.tileX, player.tileY);
+			return entityAtPosition(player.tileX, player.tileY) != null;
 		}
 		
 		private function playerShotLight(direction:String):Boolean
 		{
-			//hitscan in passed direction
+			var hitscanVector:FlxPoint = getVectorForDirection(direction);
+			if (hitscanVector == null)
+				return false;
+			
+			var x:int = player.tileX;
+			var y:int = player.tileY;
+			
+			var levelHeight:int = levelData.length / LEVEL_WIDTH;
+			while (x > 0 && x < LEVEL_WIDTH && y > 0 && y < levelHeight)
+			{
+				x += hitscanVector.x;
+				y += hitscanVector.y;
+				if (wallAtPosition(x, y))
+					return false;
+				var entity:Entity = entityAtPosition(x, y);
+				if (entity != null)
+				{
+					var light:Light = entity as Light;
+					if (light == null || light.destroyed)
+						return false;
+					
+					light.smash();
+					return true;
+					
+				}
+			}
+			
 			return false;
 		}
 		
 		private function wallAtPosition(x:int, y:int):Boolean
 		{
-			levelData[x + (x * LEVEL_WIDTH)] == 1;
+			return levelData[x + (y * LEVEL_WIDTH)] == 1;
 		}
 		
-		private function entityAtPosition(x:int, y:int):Boolean
+		private function entityAtPosition(x:int, y:int):Entity
 		{
 			for (var i:int = 0; i < otherEntities.members.length; ++i)
 			{
 				var entity:Entity = otherEntities.members[i] as Entity;
-				if (entity.alive && entity.tileX == x && y == player.tileY)
-					return true;
+				if (entity.alive && entity.tileX == x && entity.tileY == y)
+					return entity;
 			}
-			return false;
+			return null;
+		}
+		
+		private function getVectorForDirection(direction:String):FlxPoint
+		{
+			switch (direction)
+			{
+				case "UP": return new FlxPoint(0, -1);
+				case "DOWN": return new FlxPoint(0, 1);
+				case "LEFT": return new FlxPoint(-1, 0);
+				case "RIGHT": return new FlxPoint(1, 0);
+			}
+			return null;
 		}
 		
 		private function getLevelData():Array
