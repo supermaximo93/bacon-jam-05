@@ -9,9 +9,12 @@ package
 	 */
 	public class Main extends FlxGame 
 	{
+		
+		public static const FRAMERATE:int = 60;
+		
 		public function Main():void 
 		{
-			super(320, 240, PlayState, 2);
+			super(320, 240, PlayState, 2, FRAMERATE, FRAMERATE);
 		}
 	}
 	
