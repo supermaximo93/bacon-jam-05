@@ -7,7 +7,17 @@ package
 	 */
 	public class RoomOverlay extends Entity 
 	{
-		private var ALPHA_DELTA_SPEED:Number = 2.0;
+		private static var colors:Array = new Array(
+			0xff00ffff,
+			0xff0000ff,
+			0xff00ff00,
+			0xffff0000,
+			0xffff00ff,
+			0xffffff00
+		);
+		
+		private const ALPHA_DELTA_SPEED:Number = 2.0;
+		private const MAX_ALPHA:Number = 0.7;
 		
 		private var _alphaGoingDown:Boolean;
 		private var _lightsOut:Boolean;
@@ -15,9 +25,10 @@ package
 		public function RoomOverlay(x:int, y:int, width:int, height:int) 
 		{
 			super(x, y, null);
-			makeGraphic(width * PlayState.TILE_SIZE, height * PlayState.TILE_SIZE, 0xff00ffff);
+			makeGraphic(width * PlayState.TILE_SIZE, height * PlayState.TILE_SIZE, ArrayHelpers.sample(colors) as uint);
 			_alphaGoingDown = true;
 			_lightsOut = false;
+			alpha = MAX_ALPHA * FlxG.random();
 		}
 		
 		public function setLightsOut():void
@@ -39,10 +50,11 @@ package
 				{
 					alpha = 0.0;
 					_alphaGoingDown = false;
+					makeGraphic(width, height, ArrayHelpers.sample(colors) as uint);
 				}
-				else if (alpha >= 1.0)
+				else if (alpha >= MAX_ALPHA)
 				{
-					alpha = 1.0;
+					alpha = MAX_ALPHA;
 					_alphaGoingDown = true;
 				}
 			}
