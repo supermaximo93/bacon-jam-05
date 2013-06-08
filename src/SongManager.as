@@ -42,8 +42,8 @@ package
 			time += FlxG.elapsed;
 			if (time >= nextBeatTime)
 			{
-				if (beatIndex < 0)
-					FlxG.playMusic(testMusic);
+				//if (beatIndex < 0)
+				//	FlxG.playMusic(testMusic);
 				
 				time -= nextBeatTime;
 				if (++beatIndex >= beats.length)
