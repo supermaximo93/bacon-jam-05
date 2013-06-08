@@ -239,6 +239,11 @@ package
 			return null;
 		}
 		
+		public function corridorAtPosition(x:int, y:int):Boolean
+		{
+			return !wallAtPosition(x, y) && ((wallAtPosition(x - 1, y) && wallAtPosition(x + 1, y)) || (wallAtPosition(x, y - 1) && wallAtPosition(x, y + 1)));
+		}
+		
 		private function playerIsColliding():Boolean
 		{
 			return playerIsCollidingWithWall() || playerIsCollidingWithEntity();
