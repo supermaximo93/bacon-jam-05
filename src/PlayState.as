@@ -73,6 +73,7 @@ package
 		{			
 			var playerDidAction:Boolean = false;
 			var comboBreaker:Boolean = false;
+			var smashedLight:Boolean = false;
 			
 			if (FlxG.keys.justPressed("W"))
 			{
@@ -124,25 +125,33 @@ package
 			}
 			else if (FlxG.keys.justPressed("UP"))
 			{
-				if (!playerShotLight("UP"))
+				if (playerShotLight("UP"))
+					smashedLight = true;
+				else
 					comboBreaker = true;
 				playerDidAction = true;
 			}
 			else if (FlxG.keys.justPressed("DOWN"))
 			{
-				if (!playerShotLight("DOWN"))
+				if (playerShotLight("DOWN"))
+					smashedLight = true;
+				else
 					comboBreaker = true;
 				playerDidAction = true;
 			}
 			else if (FlxG.keys.justPressed("LEFT"))
 			{
-				if (!playerShotLight("LEFT"))
+				if (playerShotLight("LEFT"))
+					smashedLight = true;
+				else
 					comboBreaker = true;
 				playerDidAction = true;
 			}
 			else if (FlxG.keys.justPressed("RIGHT"))
 			{
-				if (!playerShotLight("RIGHT"))
+				if (playerShotLight("RIGHT"))
+					smashedLight = true;
+				else
 					comboBreaker = true;
 				playerDidAction = true;
 			}
@@ -161,6 +170,12 @@ package
 					++combo;
 					comboText.text = "x" + combo.toString();
 					comboText.visible = true;
+					if (smashedLight)
+					{
+						score += combo;
+						if (songManager.startOfBar())
+							score += combo;
+					}
 				}
 				else
 				{
@@ -220,7 +235,6 @@ package
 						return false;
 					
 					light.smash();
-					score += combo;
 					return true;
 					
 				}

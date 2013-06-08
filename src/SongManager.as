@@ -19,6 +19,7 @@ package
 		private var _timePerBeat:Number;
 		private var _time:Number;
 		private var _beatAlreadyScored:Boolean;
+		private var _beatsPassedInBar:Number;
 		
 		private var _beats:Array = [
 			1, 1, 1, 0.5, 0.5
@@ -35,6 +36,7 @@ package
 			_beatIndex = -1;
 			_nextBeatTime = _timePerBeat;
 			_beatAlreadyScored = false;
+			_beatsPassedInBar = 0.0;
 		}
 		
 		public function update():void
@@ -42,7 +44,13 @@ package
 			_time += FlxG.elapsed;
 			if (_time >= _nextBeatTime)
 			{
-				//if (beatIndex < 0)
+				if (_beatIndex >= 0)
+				{
+					_beatsPassedInBar += _beats[_beatIndex];
+					if (_beatsPassedInBar >= 4.0)
+						_beatsPassedInBar -= 4.0;
+				}
+				//else
 				//	FlxG.playMusic(testMusic);
 				
 				_time -= _nextBeatTime;
@@ -72,6 +80,11 @@ package
 		public function moveIsInTimeForVisuals():Boolean
 		{
 			return _time <= BEAT_TIME_TOLERANCE;
+		}
+		
+		public function startOfBar():Boolean
+		{
+			return _beatsPassedInBar == 0.0;
 		}
 		
 	}
