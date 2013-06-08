@@ -66,6 +66,7 @@ package
 			hud = new FlxGroup();
 			hud.add(scoreText);
 			hud.add(comboText);
+			hud.add(BeatIndicator.group);
 			//hud.add(playerMovesText);
 			hud.setAll("scrollFactor", new FlxPoint(0, 0));
 			add(hud);

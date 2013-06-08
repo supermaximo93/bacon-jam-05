@@ -24,8 +24,11 @@ package
 		private var _beats:Array = [
 			1, 1, 1, 0.5, 0.5
 		];
+		private var _beatStream:Array;
 		private var _beatIndex:int;
 		private var _nextBeatTime:Number;
+		private var _spaceBetweenBeats:Number;
+		private var _beatIndicatorVelocity:Number;
 		
 		public function SongManager(bpm:int) 
 		{
@@ -34,9 +37,13 @@ package
 			_timePerBeat = 1.0 / beatsPerSecond;
 			_time = 0.0;
 			_beatIndex = -1;
-			_nextBeatTime = _timePerBeat;
+			_nextBeatTime = _timePerBeat * 4;
 			_beatAlreadyScored = false;
 			_beatsPassedInBar = 0.0;
+			_beatStream = new Array();
+			_beatIndicatorVelocity = -(FlxG.width + (PlayState.TILE_SIZE / 2)) / _nextBeatTime;
+			_spaceBetweenBeats = -_beatIndicatorVelocity * _timePerBeat;
+			updateBeatStream();
 		}
 		
 		public function update():void
@@ -50,13 +57,14 @@ package
 					if (_beatsPassedInBar >= 4.0)
 						_beatsPassedInBar -= 4.0;
 				}
-				//else
-				//	FlxG.playMusic(testMusic);
+				else
+					FlxG.playMusic(testMusic);
 				
 				_time -= _nextBeatTime;
 				if (++_beatIndex >= _beats.length)
 					_beatIndex = 0;
 				_nextBeatTime = _timePerBeat * _beats[_beatIndex];
+				updateBeatStream();
 				
 				FlxG.play(kickSound);
 			}
@@ -85,6 +93,37 @@ package
 		public function startOfBar():Boolean
 		{
 			return _beatsPassedInBar == 0.0;
+		}
+		
+		private function updateBeatStream():void
+		{
+			const BEAT_COUNT:int = 15;
+			if (_beatStream.length > 0)
+				_beatStream.splice(0, _beatStream.length);
+			var beatIndex:int = _beatIndex < 0 ? 0 : _beatIndex;
+			
+			for (var i:int = 0; i < BEAT_COUNT; ++i)
+			{
+				_beatStream.push(_beats[beatIndex]);
+				if (++beatIndex >= _beats.length)
+					beatIndex = 0;
+			}
+			
+			var indicators:Array = BeatIndicator.group.members.filter(function(el:*, index:int, arr:Array):Boolean { return el is FlxSprite && (el as FlxSprite).alive; } ).sortOn("x", Array.NUMERIC);
+			var indicatorCount:int = indicators.length;
+			if (indicatorCount == 0)
+			{
+				indicators.push(BeatIndicator.create(FlxG.width * 1.5, 100, _beatIndicatorVelocity));
+				++indicatorCount;
+			}
+			
+			while (indicatorCount < BEAT_COUNT)
+			{
+				var indicatorInFront:BeatIndicator = indicators[indicatorCount - 1];
+				var nextBeat:Number = _beatStream[indicatorCount - 1];
+				indicators.push(BeatIndicator.create(indicatorInFront.x + (nextBeat * _spaceBetweenBeats), 100, _beatIndicatorVelocity));
+				++indicatorCount;
+			}
 		}
 		
 	}
