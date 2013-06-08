@@ -19,6 +19,8 @@ package
 		private const LEVEL_ROWS:int = 5;
 		private const CORRIDOR_PADDING:int = 0;
 		
+		private static var _instance:PlayState;
+		
 		private var songManager:SongManager;
 		private var player:Player;
 		private var score:int;
@@ -31,9 +33,17 @@ package
 		private var otherEntities:FlxGroup;
 		private var levelData:Object;
 		private var tileMap:FlxTilemap;
+		private var people:Array;
+		private var peopleMovedThisBeat:Boolean;
+		
+		public static function get instance():PlayState
+		{
+			return _instance;
+		}
 		
 		override public function create():void 
 		{
+			_instance = this;
 			songManager = new SongManager(120);
 			
 			tileMap = new FlxTilemap();
@@ -60,17 +70,35 @@ package
 			hud.setAll("scrollFactor", new FlxPoint(0, 0));
 			add(hud);
 			
+			people = new Array();
+			peopleMovedThisBeat = false;
+			
 			levelData = getLevelData();
 			for (var x:int = 0; x < LEVEL_COLUMNS; ++x)
 			{
 				for (var y:int = 0; y < LEVEL_ROWS; ++y)
-					levelData.rooms[x][y].addLightsToGroup(otherEntities);
+					levelData.rooms[x][y].addLightsAndPeopleToGroup(otherEntities, people);
 			}
 			tileMap.loadMap(FlxTilemap.arrayToCSV(levelData.tileMap, LEVEL_WIDTH), FlxTilemap.ImgAuto, 0, 0, FlxTilemap.AUTO);
 		}
 		
 		override public function update():void 
-		{			
+		{
+			if (songManager.moveIsInTimeForVisuals())
+			{
+				player.scale = new FlxPoint(1.2, 1.2);
+				if (!peopleMovedThisBeat)
+				{
+					movePeople();
+					peopleMovedThisBeat = true;
+				}
+			}
+			else
+			{
+				player.scale = new FlxPoint(1.0, 1.0);
+				peopleMovedThisBeat = false;
+			}
+			
 			var playerDidAction:Boolean = false;
 			var comboBreaker:Boolean = false;
 			var smashedLight:Boolean = false;
@@ -185,15 +213,30 @@ package
 				//playerMovesText.text = "Moves: " + playerMoves.toString();
 			}
 			
-			
-			if (songManager.moveIsInTimeForVisuals())
-				player.scale = new FlxPoint(1.2, 1.2);
-			else
-				player.scale = new FlxPoint(1.0, 1.0);
-			
 			scoreText.text = "Score: " + (score - playerMoves).toString();
 			
 			super.update();
+		}
+		
+		public function nothingAtPosition(x:int, y:int):Boolean
+		{
+			return !wallAtPosition(x, y) && entityAtPosition(x, y) == null && !(player.tileX == x && player.tileY == y);
+		}
+		
+		public function wallAtPosition(x:int, y:int):Boolean
+		{
+			return levelData.tileMap[x + (y * LEVEL_WIDTH)] == 1;
+		}
+		
+		public function entityAtPosition(x:int, y:int):Entity
+		{
+			for (var i:int = 0; i < otherEntities.members.length; ++i)
+			{
+				var entity:Entity = otherEntities.members[i] as Entity;
+				if (entity != null && entity.alive && entity.tileX == x && entity.tileY == y)
+					return entity;
+			}
+			return null;
 		}
 		
 		private function playerIsColliding():Boolean
@@ -243,22 +286,6 @@ package
 			return false;
 		}
 		
-		private function wallAtPosition(x:int, y:int):Boolean
-		{
-			return levelData.tileMap[x + (y * LEVEL_WIDTH)] == 1;
-		}
-		
-		private function entityAtPosition(x:int, y:int):Entity
-		{
-			for (var i:int = 0; i < otherEntities.members.length; ++i)
-			{
-				var entity:Entity = otherEntities.members[i] as Entity;
-				if (entity != null && entity.alive && entity.tileX == x && entity.tileY == y)
-					return entity;
-			}
-			return null;
-		}
-		
 		private function getVectorForDirection(direction:String):FlxPoint
 		{
 			switch (direction)
@@ -269,6 +296,12 @@ package
 				case "RIGHT": return new FlxPoint(1, 0);
 			}
 			return null;
+		}
+		
+		private function movePeople():void
+		{
+			for (var i:int = 0; i < people.length; ++i)
+				people[i].move();
 		}
 		
 		private function getLevelData():Object

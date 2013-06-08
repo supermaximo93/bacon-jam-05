@@ -16,6 +16,7 @@ package
 		private var _positionY:int;
 		private var _connectedRooms:Array;
 		private var _lights:Array;
+		private var _people:Array;
 		private var _overlay:RoomOverlay;
 		
 		public function get positionX():int
@@ -50,8 +51,10 @@ package
 			_isCorridor = FlxG.random() <= CHANCE_OF_CORRIDOR;
 			_connectedRooms = new Array();
 			_lights = new Array();
+			_people = new Array();
+			_overlay = null;
 			if (!_isCorridor)
-				generateLights(roomWidth, roomHeight);
+				generateLightsAndPeople(roomWidth, roomHeight);
 		}
 		
 		public function connectTo(room:MapRoom):void
@@ -89,11 +92,18 @@ package
 			return null;
 		}
 		
-		public function addLightsToGroup(group:FlxGroup):void
+		public function addLightsAndPeopleToGroup(group:FlxGroup, peopleArr:Array):void
 		{
-			for (var i:int = 0; i < _lights.length; ++i)
+			var i:int;
+			for (i = 0; i < _lights.length; ++i)
 				group.add(_lights[i]);
-			group.add(_overlay);
+			for (i = 0; i < _people.length; ++i)
+			{
+				group.add(_people[i]);
+				peopleArr.push(_people[i]);
+			}
+			if (_overlay != null)
+				group.add(_overlay);
 		}
 		
 		public function removeLight(light:Light):void
@@ -103,10 +113,12 @@ package
 				_overlay.setLightsOut();
 		}
 		
-		private function generateLights(roomWidth:int, roomHeight:int):void
+		private function generateLightsAndPeople(roomWidth:int, roomHeight:int):void
 		{
-			const LIGHTS_PER_SQUARE:Number = 0.03;
-			var lightCount:int = int(LIGHTS_PER_SQUARE * roomWidth * roomHeight * Math.random());
+			const LIGHTS_PER_SQUARE:Number = 0.06;
+			const PEOPLE_PER_SQUARE:Number = 0.04;
+			var lightCount:int = int(LIGHTS_PER_SQUARE * roomWidth * roomHeight * FlxG.random());
+			var personCount:int = int(PEOPLE_PER_SQUARE * roomWidth * roomHeight * FlxG.random());
 			
 			var minX:int = (positionX * roomWidth) + 1;
 			var maxX:int = minX + roomWidth - 2;
@@ -125,24 +137,29 @@ package
 				if ((y == minY || y == maxY) && x == midX)
 					continue;
 				
-				var positionTaken:Boolean = false;
-				
-				for (var i:int = 0; i < _lights.length; ++i)
+				if (!entityAtPosition(_lights, x, y) && !entityAtPosition(_people, x, y))
 				{
-					var light:Light = _lights[i] as Light;
-					if (light.tileX == x && light.tileY == y)
-					{
-						positionTaken = true;
-						break;
-					}
+					if (_lights.length < lightCount)
+						_lights.push(new Light(x, y, this));
+					else
+						_people.push(new Person(x, y));
 				}
 				
-				if (!positionTaken)
-					_lights.push(new Light(x, y, this));
-				
-			} while (_lights.length < lightCount);
+			} while (_lights.length < lightCount || _people.length < personCount);
 			
-			_overlay = new RoomOverlay(minX, minY, roomWidth - 2, roomHeight - 2);
+			if (lightCount > 0)
+				_overlay = new RoomOverlay(minX, minY, roomWidth - 2, roomHeight - 2);
+		}
+		
+		private function entityAtPosition(arr:Array, x:int, y:int):Boolean
+		{
+			for (var i:int = 0; i < arr.length; ++i)
+			{
+				var entity:Entity = arr[i] as Entity;
+				if (entity.tileX == x && entity.tileY == y)
+					return true;
+			}
+			return false;
 		}
 		
 		private function lerp(min:Number, max:Number, percentage:Number):Number
