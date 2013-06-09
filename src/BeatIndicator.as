@@ -8,6 +8,7 @@ package
 	 */
 	public class BeatIndicator extends FlxSprite 
 	{
+		[Embed(source="../assets/images/beat.png")] private var sprite:Class;
 		
 		public static var mainGroup:FlxGroup;
 		public static var dummyGroup:FlxGroup;
@@ -46,7 +47,7 @@ package
 			beatIndicator._killNow = true;
 			beatIndicator.scale = new FlxPoint(1.5, 1.5);
 			beatIndicator.velocity.x = 0;
-			beatIndicator.makeGraphic(PlayState.TILE_SIZE, PlayState.TILE_SIZE, 0xffffff00);
+			beatIndicator.makeGraphic(PlayState.TILE_SIZE, PlayState.TILE_SIZE, 0xff623760);
 		}
 		
 		private static function getClosestBeatIndicatorToCenter():BeatIndicator
@@ -110,7 +111,7 @@ package
 			_killTimer = 0.0;
 			_isDummy = false;
 			_dummy = null;
-			makeGraphic(PlayState.TILE_SIZE, PlayState.TILE_SIZE, 0xffffffff);
+			loadGraphic(sprite);
 		}
 		
 		override public function update():void 

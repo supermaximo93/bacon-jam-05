@@ -55,6 +55,7 @@ package
 		
 		override public function create():void 
 		{
+			FlxG.bgColor = 0xffdddddd;
 			_instance = this;
 			BeatIndicator.init();
 			songManager = new SongManager(120);
