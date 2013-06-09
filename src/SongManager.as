@@ -21,6 +21,7 @@ package
 		private var _time:Number;
 		private var _beatAlreadyScored:Boolean;
 		private var _beatsPassedInBar:Number;
+		private var _moveIsInTimeLastUpdate:Boolean;
 		
 		private var _beats:Array = [
 			1, 1, 1, 0.5, 0.5
@@ -31,7 +32,7 @@ package
 		private var _spaceBetweenBeats:Number;
 		private var _beatIndicatorVelocity:Number;
 		
-		public function SongManager(bpm:int) 
+		public function SongManager(bpm:int)
 		{
 			_bpm = bpm;
 			var beatsPerSecond:Number = bpm / 60.0;
@@ -70,8 +71,15 @@ package
 				FlxG.play(kickSound);
 			}
 			
-			if (!moveIsInTime())
+			if (moveIsInTime())
+				_moveIsInTimeLastUpdate = true;
+			else
+			{
+				if (_moveIsInTimeLastUpdate && !_beatAlreadyScored)
+					PlayState.instance.missBeat();
 				_beatAlreadyScored = false;
+				_moveIsInTimeLastUpdate = false;
+			}
 		}
 		
 		public function scoreBeat():Boolean

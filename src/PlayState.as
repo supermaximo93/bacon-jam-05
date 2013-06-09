@@ -10,8 +10,14 @@ package
 	public class PlayState extends FlxState 
 	{
 		public static const TILE_SIZE:int = 8;
-		private const SCORETEXT_OFFSET:int = 5;
-		private const COMBOTEXT_OFFSET:int = 20;
+		private const SCORETEXT_OFFSET_X:int = 5;
+		private const SCORETEXT_OFFSET_Y:int = 5;
+		private const COMBOTEXT_OFFSET_X:int = 5;
+		private const COMBOTEXT_OFFSET_Y:int = 20;
+		private const LIGHTCOUNTTEXT_OFFSET_X:int = 100;
+		private const LIGHTCOUNTTEXT_OFFSET_Y:int = 5;
+		private const BEATTEXT_OFFSET_X:int = 5;
+		private const BEATTEXT_OFFSET_Y:int = 100;
 		//private const PLAYERMOVESTEXT_OFFSET:int = 100;
 		private const LEVEL_WIDTH:int = 50;
 		private const LEVEL_HEIGHT:int = 50;
@@ -27,6 +33,10 @@ package
 		private var scoreText:FlxText;
 		private var combo:int;
 		private var comboText:FlxText;
+		private var lightCount:int;
+		private var lightCountText:FlxText;
+		private var consecutiveBeats:int;
+		private var beatText:FlxText;
 		private var playerMoves:int;
 		//private var playerMovesText:FlxText;
 		private var hud:FlxGroup;
@@ -60,15 +70,21 @@ package
 			score = 0;
 			combo = 0;
 			playerMoves = 0;
-			scoreText = new FlxText(SCORETEXT_OFFSET, SCORETEXT_OFFSET, 100, "Score: 0");
-			comboText = new FlxText(SCORETEXT_OFFSET, COMBOTEXT_OFFSET, 100, "x0");
+			consecutiveBeats = 0;
+			scoreText = new FlxText(SCORETEXT_OFFSET_X, SCORETEXT_OFFSET_Y, 100, "Score: 0");
+			comboText = new FlxText(COMBOTEXT_OFFSET_X, COMBOTEXT_OFFSET_Y, 100, "x0");
 			comboText.visible = false;
+			lightCountText = new FlxText(LIGHTCOUNTTEXT_OFFSET_X, LIGHTCOUNTTEXT_OFFSET_Y, 100);
+			beatText = new FlxText(BEATTEXT_OFFSET_X, BEATTEXT_OFFSET_Y, 100, "x0");
+			beatText.visible = false;
 			//playerMovesText = new FlxText(SCORETEXT_OFFSET, PLAYERMOVESTEXT_OFFSET, 100, "Moves: 0");
 			hud = new FlxGroup();
-			hud.add(scoreText);
-			hud.add(comboText);
 			hud.add(BeatIndicator.mainGroup);
 			hud.add(BeatIndicator.dummyGroup);
+			hud.add(scoreText);
+			hud.add(comboText);
+			hud.add(lightCountText);
+			hud.add(beatText);
 			//hud.add(playerMovesText);
 			hud.setAll("scrollFactor", new FlxPoint(0, 0));
 			add(hud);
@@ -79,6 +95,7 @@ package
 			levelData = getLevelData();
 			var roomWidth:int = LEVEL_WIDTH / LEVEL_COLUMNS;
 			var roomHeight:int = LEVEL_HEIGHT / LEVEL_ROWS;
+			lightCount = 0;
 			for (var x:int = 0; x < LEVEL_COLUMNS; ++x)
 			{
 				for (var y:int = 0; y < LEVEL_ROWS; ++y)
@@ -86,9 +103,11 @@ package
 					var room:MapRoom = levelData.rooms[x][y];
 					room.generateLightsAndPeople(roomWidth, roomHeight);
 					room.addLightsAndPeopleToGroup(otherEntities, people);
+					lightCount += room.lightCount;
 				}
 			}
 			tileMap.loadMap(FlxTilemap.arrayToCSV(levelData.tileMap, LEVEL_WIDTH), FlxTilemap.ImgAuto, 0, 0, FlxTilemap.AUTO);
+			lightCountText.text = "Lights: " + lightCount.toString();
 		}
 		
 		override public function update():void 
@@ -209,12 +228,14 @@ package
 					comboText.visible = true;
 					if (smashedLight)
 					{
-						score += combo;
+						var scoreAdded:int = combo + consecutiveBeats;
+						score += scoreAdded;
 						if (songManager.startOfBar())
-							score += combo;
+							score += scoreAdded;
 					}
 					
 					BeatIndicator.score();
+					++consecutiveBeats;
 				}
 				else
 				{
@@ -225,6 +246,13 @@ package
 			}
 			
 			scoreText.text = "Score: " + (score - playerMoves).toString();
+			if (consecutiveBeats == 0)
+				beatText.visible = false;
+			else
+			{
+				beatText.text = "x" + consecutiveBeats.toString();
+				beatText.visible = true;
+			}
 			
 			super.update();
 		}
@@ -253,6 +281,17 @@ package
 		public function corridorAtPosition(x:int, y:int):Boolean
 		{
 			return !wallAtPosition(x, y) && ((wallAtPosition(x - 1, y) && wallAtPosition(x + 1, y)) || (wallAtPosition(x, y - 1) && wallAtPosition(x, y + 1)));
+		}
+		
+		public function decLightCount():void
+		{
+			--lightCount;
+			lightCountText.text = "Lights: " + lightCount.toString();
+		}
+		
+		public function missBeat():void
+		{
+			consecutiveBeats = 0;
 		}
 		
 		private function playerIsColliding():Boolean

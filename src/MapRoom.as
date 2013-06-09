@@ -44,6 +44,11 @@ package
 			return _connectedRooms.length > 0;
 		}
 		
+		public function get lightCount():int
+		{
+			return _lights.length;
+		}
+		
 		public function MapRoom(positionX:int, positionY:int, roomWidth:int, roomHeight:int)
 		{
 			_positionX = positionX;
