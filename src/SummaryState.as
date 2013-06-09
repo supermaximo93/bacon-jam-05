@@ -27,6 +27,7 @@ package
 			add(movesText);
 			add(comboText);
 			add(consecutiveBeatsText);
+			FlxG.bgColor = 0xff000000;
 			FlxG.playMusic(SongManager.menuMusic);
 		}
 		

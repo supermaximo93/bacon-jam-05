@@ -220,11 +220,8 @@ package
 				player.angle = 0;
 			}
 			
-			CONFIG::debug {
-				if (FlxG.keys.justPressed("ESCAPE"))
-					//System.exit(0);
-					lightCount = 0;
-			}
+			if (FlxG.keys.justPressed("ESCAPE"))
+				lightCount = 0;
 			
 			songManager.update();
 			
@@ -270,7 +267,11 @@ package
 			super.update();
 			
 			if (lightCount == 0)
+			{
 				FlxG.switchState(new SummaryState(score, playerMoves, highestCombo, highestConsecutiveBeats));
+				songManager.sound.stop();
+				songManager.sound.kill();
+			}
 		}
 		
 		public function nothingAtPosition(x:int, y:int):Boolean

@@ -26,13 +26,14 @@ package
 		private var _moveIsInTimeLastUpdate:Boolean;
 		
 		private var _beats:Array = [
-			1, 1, 1, 0.5, 0.5
+			1, 1, 1, 1
 		];
 		private var _beatStream:Array;
 		private var _beatIndex:int;
 		private var _nextBeatTime:Number;
 		private var _spaceBetweenBeats:Number;
 		private var _beatIndicatorVelocity:Number;
+		public var sound:FlxSound;
 		
 		public function SongManager(bpm:int)
 		{
@@ -62,7 +63,7 @@ package
 						_beatsPassedInBar -= 4.0;
 				}
 				else
-					FlxG.playMusic(song1);
+					sound = FlxG.play(song1, 1.0, true);
 				
 				_time -= _nextBeatTime;
 				if (++_beatIndex >= _beats.length)

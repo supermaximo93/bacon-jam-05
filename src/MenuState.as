@@ -12,7 +12,8 @@ package
 		
 		override public function create():void 
 		{
-			super.create();
+			add(new FlxText(45, 50, 100, "RAVE CRASHER"));
+			add(new FlxText(30, 70, 120, "Press space to start"));
 			if (playMusic)
 				FlxG.playMusic(SongManager.menuMusic);
 			playMusic = false;
@@ -24,6 +25,7 @@ package
 			if (FlxG.keys.justPressed("SPACE"))
 			{
 				FlxG.music.stop();
+				FlxG.music.kill();
 				FlxG.switchState(new PlayState());
 			}
 		}
