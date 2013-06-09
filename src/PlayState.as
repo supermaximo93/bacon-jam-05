@@ -45,6 +45,8 @@ package
 		private var tileMap:FlxTilemap;
 		private var people:Array;
 		private var peopleMovedThisBeat:Boolean;
+		private var highestCombo:int;
+		private var highestConsecutiveBeats:int;
 		
 		public static function get instance():PlayState
 		{
@@ -71,6 +73,9 @@ package
 			combo = 0;
 			playerMoves = 0;
 			consecutiveBeats = 0;
+			highestCombo = 0;
+			highestConsecutiveBeats = 0;
+			
 			scoreText = new FlxText(SCORETEXT_OFFSET_X, SCORETEXT_OFFSET_Y, 100, "Score: 0");
 			comboText = new FlxText(COMBOTEXT_OFFSET_X, COMBOTEXT_OFFSET_Y, 100, "x0");
 			comboText.visible = false;
@@ -214,7 +219,8 @@ package
 			
 			CONFIG::debug {
 				if (FlxG.keys.justPressed("ESCAPE"))
-					System.exit(0);
+					//System.exit(0);
+					lightCount = 0;
 			}
 			
 			songManager.update();
@@ -224,6 +230,8 @@ package
 				if (!comboBreaker && songManager.scoreBeat())
 				{
 					++combo;
+					if (combo > highestCombo)
+						highestCombo = combo;
 					comboText.text = "x" + combo.toString();
 					comboText.visible = true;
 					if (smashedLight)
@@ -236,6 +244,8 @@ package
 					
 					BeatIndicator.score();
 					++consecutiveBeats;
+					if (consecutiveBeats > highestConsecutiveBeats)
+						highestConsecutiveBeats = consecutiveBeats;
 				}
 				else
 				{
@@ -255,6 +265,9 @@ package
 			}
 			
 			super.update();
+			
+			if (lightCount == 0)
+				FlxG.switchState(new SummaryState(score, playerMoves, highestCombo, highestConsecutiveBeats));
 		}
 		
 		public function nothingAtPosition(x:int, y:int):Boolean
