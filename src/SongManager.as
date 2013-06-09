@@ -17,6 +17,7 @@ package
 		public static const BEAT_STREAM_COUNT:int = 15;
 		public static const BEAT_STREAM_Y:int = 100;
 		private const BEAT_TIME_TOLERANCE:Number = 0.2;
+		private const BARS_IN_SONG:int = 56;
 		
 		private var _bpm:int;
 		private var _timePerBeat:Number;
@@ -24,6 +25,7 @@ package
 		private var _beatAlreadyScored:Boolean;
 		private var _beatsPassedInBar:Number;
 		private var _moveIsInTimeLastUpdate:Boolean;
+		private var _barCount:int;
 		
 		private var _beats:Array = [
 			1, 1, 1, 1
@@ -49,6 +51,7 @@ package
 			_beatIndicatorVelocity = -(FlxG.width + (PlayState.TILE_SIZE / 2)) / _nextBeatTime;
 			_spaceBetweenBeats = -_beatIndicatorVelocity * _timePerBeat;
 			updateBeatStream();
+			_barCount = 0;
 		}
 		
 		public function update():void
@@ -61,13 +64,24 @@ package
 					_beatsPassedInBar += _beats[_beatIndex];
 					if (_beatsPassedInBar >= 4.0)
 						_beatsPassedInBar -= 4.0;
+					_time -= _nextBeatTime;
 				}
 				else
-					sound = FlxG.play(song1, 1.0, true);
+				{
+					sound = FlxG.play(song1);
+					_time = 0.0005;
+				}
 				
-				_time -= _nextBeatTime;
 				if (++_beatIndex >= _beats.length)
+				{
 					_beatIndex = 0;
+					if (++_barCount >= BARS_IN_SONG)
+					{
+						_barCount = 0;
+						sound = FlxG.play(song1);
+						PlayState.instance.previousSongPosition = 0;
+					}
+				}
 				_nextBeatTime = _timePerBeat * _beats[_beatIndex];
 				updateBeatStream();
 				

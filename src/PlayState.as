@@ -47,6 +47,7 @@ package
 		private var peopleMovedThisBeat:Boolean;
 		private var highestCombo:int;
 		private var highestConsecutiveBeats:int;
+		public var previousSongPosition:Number;
 		
 		public static function get instance():PlayState
 		{
@@ -116,10 +117,18 @@ package
 			FlxG.camera.follow(player);
 			FlxG.camera.setBounds(0, 0, tileMap.width, tileMap.height);
 			lightCountText.text = "Lights: " + lightCount.toString();
+			
+			previousSongPosition = 0;
 		}
 		
 		override public function update():void 
 		{
+			if (songManager.sound != null)
+			{
+				FlxG.elapsed = (songManager.sound.position - previousSongPosition) / 1000.0;
+				previousSongPosition = songManager.sound.position;
+			}
+			
 			if (songManager.moveIsInTimeForVisuals())
 			{
 				if (!peopleMovedThisBeat)
