@@ -34,6 +34,11 @@ package
 			updateYFromTileY();
 		}
 		
+		public function get canScaleUp():Boolean
+		{
+			return true;
+		}
+		
 		public function Entity(tileX:int, tileY:int, graphic:Class=null) 
 		{
 			this.tileX = tileX;
@@ -45,24 +50,37 @@ package
 		{
 			--tileY;
 			updateYFromTileY();
+			angle = 270;
 		}
 		
 		public function moveDown():void
 		{
 			++tileY;
 			updateYFromTileY();
+			angle = 90;
 		}
 		
 		public function moveLeft():void
 		{
 			--tileX;
 			updateXFromTileX();
+			angle = 180;
 		}
 		
 		public function moveRight():void
 		{
 			++tileX;
 			updateXFromTileX();
+			angle = 0;
+		}
+		
+		override public function update():void 
+		{
+			if (PlayState.instance.songManager.moveIsInTimeForVisuals() && canScaleUp)
+				scale.x = scale.y = 1.2;
+			else
+				scale.x = scale.y = 1.0;
+			super.update();
 		}
 		
 		private function updateXFromTileX():void

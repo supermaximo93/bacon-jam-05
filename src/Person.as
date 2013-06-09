@@ -7,6 +7,7 @@ package
 	 */
 	public class Person extends Entity 
 	{
+		[Embed(source="../assets/images/person.png")] private var sprite:Class;
 		
 		private static var directionVectors:Array = new Array(
 			new FlxPoint(-1, 0),
@@ -19,8 +20,7 @@ package
 		
 		public function Person(x:int, y:int) 
 		{
-			super(x, y, null);
-			makeGraphic(PlayState.TILE_SIZE, PlayState.TILE_SIZE, 0xfff4c06e);
+			super(x, y, sprite);
 		}
 		
 		public function move():void

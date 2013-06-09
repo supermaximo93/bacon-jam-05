@@ -22,6 +22,11 @@ package
 		private var _alphaGoingDown:Boolean;
 		private var _lightsOut:Boolean;
 		
+		override public function get canScaleUp():Boolean 
+		{
+			return false;
+		}
+		
 		public function RoomOverlay(x:int, y:int, width:int, height:int) 
 		{
 			super(x, y, null);

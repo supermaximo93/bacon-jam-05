@@ -27,7 +27,7 @@ package
 		
 		private static var _instance:PlayState;
 		
-		private var songManager:SongManager;
+		public var songManager:SongManager;
 		private var player:Player;
 		private var score:int;
 		private var scoreText:FlxText;
@@ -84,6 +84,7 @@ package
 			beatText.visible = false;
 			//playerMovesText = new FlxText(SCORETEXT_OFFSET, PLAYERMOVESTEXT_OFFSET, 100, "Moves: 0");
 			hud = new FlxGroup();
+			hud.add(new BeatTarget((FlxG.width / 2) - 5, SongManager.BEAT_STREAM_Y - 1));
 			hud.add(BeatIndicator.mainGroup);
 			hud.add(BeatIndicator.dummyGroup);
 			hud.add(scoreText);
@@ -119,7 +120,6 @@ package
 		{
 			if (songManager.moveIsInTimeForVisuals())
 			{
-				player.scale = new FlxPoint(1.2, 1.2);
 				if (!peopleMovedThisBeat)
 				{
 					movePeople();
@@ -127,10 +127,7 @@ package
 				}
 			}
 			else
-			{
-				player.scale = new FlxPoint(1.0, 1.0);
 				peopleMovedThisBeat = false;
-			}
 			
 			var playerDidAction:Boolean = false;
 			var comboBreaker:Boolean = false;
@@ -191,6 +188,7 @@ package
 				else
 					comboBreaker = true;
 				playerDidAction = true;
+				player.angle = 270;
 			}
 			else if (FlxG.keys.justPressed("DOWN"))
 			{
@@ -199,6 +197,7 @@ package
 				else
 					comboBreaker = true;
 				playerDidAction = true;
+				player.angle = 90;
 			}
 			else if (FlxG.keys.justPressed("LEFT"))
 			{
@@ -207,6 +206,7 @@ package
 				else
 					comboBreaker = true;
 				playerDidAction = true;
+				player.angle = 180;
 			}
 			else if (FlxG.keys.justPressed("RIGHT"))
 			{
@@ -215,6 +215,7 @@ package
 				else
 					comboBreaker = true;
 				playerDidAction = true;
+				player.angle = 0;
 			}
 			
 			CONFIG::debug {

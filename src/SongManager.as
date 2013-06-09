@@ -14,6 +14,7 @@ package
 		[Embed(source="../assets/sounds/kick.mp3")] private var kickSound:Class;
 		
 		public static const BEAT_STREAM_COUNT:int = 15;
+		public static const BEAT_STREAM_Y:int = 100;
 		private const BEAT_TIME_TOLERANCE:Number = 0.2;
 		
 		private var _bpm:int;
@@ -121,7 +122,7 @@ package
 			var indicatorCount:int = indicators.length;
 			if (indicatorCount == 0)
 			{
-				indicators.push(BeatIndicator.create(FlxG.width * 1.5, 100, _beatIndicatorVelocity));
+				indicators.push(BeatIndicator.create(FlxG.width * 1.5, BEAT_STREAM_Y, _beatIndicatorVelocity));
 				++indicatorCount;
 			}
 			
@@ -129,7 +130,7 @@ package
 			{
 				var indicatorInFront:BeatIndicator = indicators[indicatorCount - 1];
 				var nextBeat:Number = _beatStream[indicatorCount - 1];
-				indicators.push(BeatIndicator.create(indicatorInFront.x + (nextBeat * _spaceBetweenBeats), 100, _beatIndicatorVelocity));
+				indicators.push(BeatIndicator.create(indicatorInFront.x + (nextBeat * _spaceBetweenBeats), BEAT_STREAM_Y, _beatIndicatorVelocity));
 				++indicatorCount;
 			}
 		}
