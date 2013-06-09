@@ -53,8 +53,6 @@ package
 			_lights = new Array();
 			_people = new Array();
 			_overlay = null;
-			if (!_isCorridor)
-				generateLightsAndPeople(roomWidth, roomHeight);
 		}
 		
 		public function connectTo(room:MapRoom):void
@@ -113,8 +111,11 @@ package
 				_overlay.setLightsOut();
 		}
 		
-		private function generateLightsAndPeople(roomWidth:int, roomHeight:int):void
+		public function generateLightsAndPeople(roomWidth:int, roomHeight:int):void
 		{
+			if (_isCorridor)
+				return;
+			
 			const LIGHTS_PER_SQUARE:Number = 0.06;
 			const PEOPLE_PER_SQUARE:Number = 0.04;
 			var lightCount:int = int(LIGHTS_PER_SQUARE * roomWidth * roomHeight * FlxG.random());
@@ -132,9 +133,13 @@ package
 				var x:int = int(lerp(minX, maxX, FlxG.random()));
 				var y:int = int(lerp(minY, maxY, FlxG.random()));
 				
-				if ((x == minX || x == maxX) && y == midY)
+				if (PlayState.instance.corridorAtPosition(x - 1, y))
 					continue;
-				if ((y == minY || y == maxY) && x == midX)
+				if (PlayState.instance.corridorAtPosition(x + 1, y))
+					continue;
+				if (PlayState.instance.corridorAtPosition(x, y - 1))
+					continue;
+				if (PlayState.instance.corridorAtPosition(x, y + 1))
 					continue;
 				
 				if (!entityAtPosition(_lights, x, y) && !entityAtPosition(_people, x, y))

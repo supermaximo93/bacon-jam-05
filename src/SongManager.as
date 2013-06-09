@@ -57,8 +57,8 @@ package
 					if (_beatsPassedInBar >= 4.0)
 						_beatsPassedInBar -= 4.0;
 				}
-				else
-					FlxG.playMusic(testMusic);
+				//else
+				//	FlxG.playMusic(testMusic);
 				
 				_time -= _nextBeatTime;
 				if (++_beatIndex >= _beats.length)

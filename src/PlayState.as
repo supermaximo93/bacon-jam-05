@@ -75,10 +75,16 @@ package
 			peopleMovedThisBeat = false;
 			
 			levelData = getLevelData();
+			var roomWidth:int = LEVEL_WIDTH / LEVEL_COLUMNS;
+			var roomHeight:int = LEVEL_HEIGHT / LEVEL_ROWS;
 			for (var x:int = 0; x < LEVEL_COLUMNS; ++x)
 			{
 				for (var y:int = 0; y < LEVEL_ROWS; ++y)
-					levelData.rooms[x][y].addLightsAndPeopleToGroup(otherEntities, people);
+				{
+					var room:MapRoom = levelData.rooms[x][y];
+					room.generateLightsAndPeople(roomWidth, roomHeight);
+					room.addLightsAndPeopleToGroup(otherEntities, people);
+				}
 			}
 			tileMap.loadMap(FlxTilemap.arrayToCSV(levelData.tileMap, LEVEL_WIDTH), FlxTilemap.ImgAuto, 0, 0, FlxTilemap.AUTO);
 		}
