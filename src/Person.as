@@ -21,6 +21,7 @@ package
 		public function Person(x:int, y:int) 
 		{
 			super(x, y, sprite);
+			loadRotatedGraphic(sprite, 4);
 		}
 		
 		public function move():void

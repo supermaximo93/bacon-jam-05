@@ -68,7 +68,6 @@ package
 			player = new Player(5, 5);
 			add(player);
 			add(otherEntities);
-			FlxG.camera.follow(player);
 			
 			score = 0;
 			combo = 0;
@@ -114,6 +113,8 @@ package
 				}
 			}
 			tileMap.loadMap(FlxTilemap.arrayToCSV(levelData.tileMap, LEVEL_WIDTH), FlxTilemap.ImgAuto, 0, 0, FlxTilemap.AUTO);
+			FlxG.camera.follow(player);
+			FlxG.camera.setBounds(0, 0, tileMap.width, tileMap.height);
 			lightCountText.text = "Lights: " + lightCount.toString();
 		}
 		

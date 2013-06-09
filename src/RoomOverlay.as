@@ -17,7 +17,7 @@ package
 		);
 		
 		private const ALPHA_DELTA_SPEED:Number = 2.0;
-		private const MAX_ALPHA:Number = 0.7;
+		private const MAX_ALPHA:Number = 0.5;
 		
 		private var _alphaGoingDown:Boolean;
 		private var _lightsOut:Boolean;

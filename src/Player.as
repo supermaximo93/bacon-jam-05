@@ -13,7 +13,7 @@ package
 		public function Player(x:int, y:int)
 		{
 			super(x, y, sprite);
-			//makeGraphic(PlayState.TILE_SIZE, PlayState.TILE_SIZE, 0xff0000ff);
+			loadRotatedGraphic(sprite, 4);
 		}
 		
 	}
