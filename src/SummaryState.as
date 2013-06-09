@@ -27,6 +27,7 @@ package
 			add(movesText);
 			add(comboText);
 			add(consecutiveBeatsText);
+			FlxG.playMusic(SongManager.menuMusic);
 		}
 		
 		override public function update():void 

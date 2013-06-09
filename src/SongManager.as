@@ -10,8 +10,9 @@ package
 	 
 	public class SongManager 
 	{
-		[Embed(source="../assets/music/test.mp3")] private var testMusic:Class;
-		[Embed(source="../assets/sounds/kick.mp3")] private var kickSound:Class;
+		[Embed(source="../assets/music/song_1.mp3")] public static var song1:Class;
+		[Embed(source="../assets/music/menu.mp3")] public static var menuMusic:Class;
+		[Embed(source="../assets/sounds/kick.mp3")] private static var kickSound:Class;
 		
 		public static const BEAT_STREAM_COUNT:int = 15;
 		public static const BEAT_STREAM_Y:int = 100;
@@ -60,8 +61,8 @@ package
 					if (_beatsPassedInBar >= 4.0)
 						_beatsPassedInBar -= 4.0;
 				}
-				//else
-				//	FlxG.playMusic(testMusic);
+				else
+					FlxG.playMusic(song1);
 				
 				_time -= _nextBeatTime;
 				if (++_beatIndex >= _beats.length)
