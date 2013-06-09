@@ -44,6 +44,7 @@ package
 		override public function create():void 
 		{
 			_instance = this;
+			BeatIndicator.init();
 			songManager = new SongManager(120);
 			
 			tileMap = new FlxTilemap();
@@ -66,7 +67,8 @@ package
 			hud = new FlxGroup();
 			hud.add(scoreText);
 			hud.add(comboText);
-			hud.add(BeatIndicator.group);
+			hud.add(BeatIndicator.mainGroup);
+			hud.add(BeatIndicator.dummyGroup);
 			//hud.add(playerMovesText);
 			hud.setAll("scrollFactor", new FlxPoint(0, 0));
 			add(hud);
@@ -211,6 +213,8 @@ package
 						if (songManager.startOfBar())
 							score += combo;
 					}
+					
+					BeatIndicator.score();
 				}
 				else
 				{

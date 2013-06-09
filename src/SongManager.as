@@ -13,6 +13,7 @@ package
 		[Embed(source="../assets/music/test.mp3")] private var testMusic:Class;
 		[Embed(source="../assets/sounds/kick.mp3")] private var kickSound:Class;
 		
+		public static const BEAT_STREAM_COUNT:int = 15;
 		private const BEAT_TIME_TOLERANCE:Number = 0.2;
 		
 		private var _bpm:int;
@@ -97,19 +98,18 @@ package
 		
 		private function updateBeatStream():void
 		{
-			const BEAT_COUNT:int = 15;
 			if (_beatStream.length > 0)
 				_beatStream.splice(0, _beatStream.length);
 			var beatIndex:int = _beatIndex < 0 ? 0 : _beatIndex;
 			
-			for (var i:int = 0; i < BEAT_COUNT; ++i)
+			for (var i:int = 0; i < BEAT_STREAM_COUNT; ++i)
 			{
 				_beatStream.push(_beats[beatIndex]);
 				if (++beatIndex >= _beats.length)
 					beatIndex = 0;
 			}
 			
-			var indicators:Array = BeatIndicator.group.members.filter(function(el:*, index:int, arr:Array):Boolean { return el is FlxSprite && (el as FlxSprite).alive; } ).sortOn("x", Array.NUMERIC);
+			var indicators:Array = BeatIndicator.mainGroup.members.filter(function(el:*, index:int, arr:Array):Boolean { return el is FlxSprite && (el as FlxSprite).alive; } ).sortOn("x", Array.NUMERIC);
 			var indicatorCount:int = indicators.length;
 			if (indicatorCount == 0)
 			{
@@ -117,7 +117,7 @@ package
 				++indicatorCount;
 			}
 			
-			while (indicatorCount < BEAT_COUNT)
+			while (indicatorCount < BEAT_STREAM_COUNT)
 			{
 				var indicatorInFront:BeatIndicator = indicators[indicatorCount - 1];
 				var nextBeat:Number = _beatStream[indicatorCount - 1];
