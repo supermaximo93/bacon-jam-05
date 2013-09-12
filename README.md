@@ -7,3 +7,5 @@ Your next door neighbor is throwing a massive rave in his mansion, but you're tr
 For full description and controls, go here: http://bacongamejam.org/jams/bacongamejam-05/80/
 
 Play the game here: https://dl.dropboxusercontent.com/u/21951901/rave_crasher/bin/index.html
+
+![Screenshot](https://dl.dropboxusercontent.com/u/21951901/rave_crasher/screen_1.png)
